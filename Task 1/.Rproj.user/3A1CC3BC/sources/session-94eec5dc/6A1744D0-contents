@@ -33,4 +33,32 @@ decathlon_clean <- rownames_to_column(decathlon_raw, "athlete")
 decathlon_clean <- clean_names(decathlon_clean)
 
 
-# convert to tidy
+# Tidy data: convert to long format
+decathlon_clean_long <- pivot_longer(decathlon_clean,
+             cols = "x100m":"x1500m",
+             names_to = "sport",
+             values_to = "score")
+
+decathlon_clean_long <- pivot_longer(decathlon_clean,
+                                     cols = "x100m":"x1500m",
+                                     names_to = "sport",
+                                     values_to = "score")
+
+# Tidy data: rearrange columns and sort by athlete
+
+decathlon_clean_long <- decathlon_clean_long %>% 
+  relocate(sport, .after = athlete) %>% 
+  relocate(score, .after = sport) %>% 
+  relocate(competition, .after = sport)
+
+decathlon_clean_long <- decathlon_clean_long %>% 
+  arrange(athlete, sport,competition)
+
+# Tidy data: check column types
+head(decathlon_clean_long)
+# The "competition" column is a factor type, will not convert it currently as it may be useful.
+
+# Check for NA values
+  
+  colSums(is.na(decathlon_clean_long))
+# There are no NA values   

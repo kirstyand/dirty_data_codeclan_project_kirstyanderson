@@ -12,7 +12,7 @@ output: html_document
 - change row names to column called "athlete" using dplyr's row_name_to_column
 - change to long format
 - rearrange
-- convert competition to string?
+- convert competition to string
 - count NAs
 4. Analysis Answers
 5. Conclusions and notes

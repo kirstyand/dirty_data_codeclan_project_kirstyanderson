@@ -1,7 +1,7 @@
 {
     "id": "E4BB2E4C",
-    "path": null,
-    "project_path": null,
+    "path": "~/GitHub/dirty_data_codeclan_project_kirstyanderson/Task 1/documentation_and_analysis/task1_markdown.Rmd",
+    "project_path": "documentation_and_analysis/task1_markdown.Rmd",
     "type": "r_markdown",
     "hash": "0",
     "contents": "",
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "11,78",
+        "cursorPosition": "14,32",
         "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 18296165549998192,
-    "encoding": "",
+    "lastKnownWriteTime": 1681123500,
+    "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1681120096697,
+    "last_content_update": 1681125102242,
     "read_only": false,
     "read_only_alternatives": []
 }
