@@ -3,7 +3,7 @@
     "path": "C:/Users/KDizzle/Documents/GitHub/dirty_data_codeclan_project_kirstyanderson/Task 1/data_cleaning_scripts/task1_cleaning_script.R",
     "project_path": "data_cleaning_scripts/task1_cleaning_script.R",
     "type": "r_source",
-    "hash": "1789455462",
+    "hash": "629836273",
     "contents": "",
     "dirty": false,
     "created": 1681118532837.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "11,0",
-        "scrollLine": "0"
+        "cursorPosition": "35,17",
+        "scrollLine": "6"
     },
     "folds": "",
-    "lastKnownWriteTime": 1681118862,
+    "lastKnownWriteTime": 1681120280,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1681118862188,
+    "last_content_update": 1681120280506,
     "read_only": false,
     "read_only_alternatives": []
 }

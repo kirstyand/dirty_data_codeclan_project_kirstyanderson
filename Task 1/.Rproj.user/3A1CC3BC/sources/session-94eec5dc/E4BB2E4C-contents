@@ -1,0 +1,14 @@
+---
+title: "task1_markdown"
+author: "Kirsty Anderson"
+date: "2023-04-10"
+output: html_document
+---
+1. Introduction
+--------------------------------------------------------------------------------
+2. Assumptions
+
+3. Cleaning the Data
+- change row names to column called "athlete" using dplyr's row_name_to_column
+4. Analysis Answers
+5. Conclusions and notes
