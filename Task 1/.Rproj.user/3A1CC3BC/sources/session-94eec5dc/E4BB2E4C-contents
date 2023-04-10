@@ -7,7 +7,7 @@ output: html_document
 1. Introduction
 --------------------------------------------------------------------------------
 2. Assumptions
-
+- Sports are measured in metres or seconds depending on the sport.
 3. Cleaning the Data
 - change row names to column called "athlete" using dplyr's row_name_to_column
 - change to long format
@@ -16,3 +16,113 @@ output: html_document
 - count NAs
 4. Analysis Answers
 5. Conclusions and notes
+
+
+--------------------------------------------------------------------------------
+# Load libraries
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+# Load in cleaned data
+
+```{r}
+decathlon <- read_csv(here("clean_data/decathlon_cleaned.csv"))
+
+```
+# Analysis Questions 
+
+Q1: Who had the longest long jump seen in the data?
+
+- First, check what sports are listed to see if there are >1 long_jump categories:
+```{r}
+decathlon %>% distinct(sport)
+```
+- There is only one long_jump variable
+
+```{r}
+decathlon %>% 
+  filter(sport == "long_jump") %>% 
+  arrange(desc(score_metres_seconds)) %>% 
+  head(1)
+```
+A: Clay had the longest long jump at 7.96 metres.
+--------------------------------------------------------------------------------
+
+Q2: What was the average 100m time in each competition?
+
+```{r}
+decathlon %>% 
+  filter(sport == "x100m") %>% 
+  group_by(competition) %>% 
+  summarise(average_100m = round(mean(score_metres_seconds), digits =2)) 
+  
+  
+```
+A: The average 100m time in the Decastar competition was 11.18 seconds, in the OlympicG competition it was       10.92 seconds.
+--------------------------------------------------------------------------------
+
+Q3: Who had the highest total points across both competitions?
+Step 1: Check all athletes competed in both competitions
+Step 2: Get total points for all athletes
+Step 3: Get highest points
+
+
+```{r}
+decathlon %>% 
+  distinct(athlete, competition) %>% 
+  group_by(athlete) %>% 
+  summarise(n_distinct(competition))
+  
+```
+Not all athletes competed in both competitions. Therefore I will only use athletes that competed in >1 competition.
+Create a list of athletes that competed in >1 competition (9 athletes)
+
+```{r}
+double_comp_athletes <- decathlon %>% 
+  distinct(athlete, competition) %>% 
+  group_by(athlete) %>% 
+  summarise(competitions_played = n_distinct(competition)) %>% 
+  arrange(desc(competitions_played)) %>% 
+  filter(competitions_played > 1) %>% 
+  pull(athlete)
+
+as.list(double_comp_athletes)
+```
+
+```{r}
+for (athlete_name in double_comp_athletes) {
+  decathlon %>% 
+    filter(athlete == "athlete_name") %>% 
+    group_by(competition) %>% 
+    summarise()
+  
+}
+
+
+
+
+
+```
+
+```{r}
+decathlon %>% 
+    filter(athlete == "barras") %>% 
+    distinct(competition, points) %>% 
+  summarise(sum(points)) %>% 
+  
+  
+```
+
+Q4: What was the shot-put scores for the top three competitors in each competition?
+- First find the top 3 competitors in each competition
+```{r}
+
+decathlon %>% 
+  select(distinct(athlete,competition))
+  group_by(competition) %>% 
+  arrange(desc(points))
+```
+
