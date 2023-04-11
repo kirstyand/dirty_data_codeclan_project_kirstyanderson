@@ -1,0 +1,14 @@
+---
+title: "task4_markdown"
+author: "Kirsty Anderson"
+date: "2023-04-11"
+output: html_document
+---
+
+1. Introduction
+--------------------------------------------------------------------------------
+2. Assumptions
+3. Cleaning the Data
+4. Analysis Answers
+5. Conclusions and notes
+
