@@ -8,6 +8,8 @@ output: html_document
 1. Introduction
 --------------------------------------------------------------------------------
 2. Assumptions
+- the dimensions of all 3 tables is different
+
 3. Cleaning the Data
 4. Analysis Answers
 5. Conclusions and notes
