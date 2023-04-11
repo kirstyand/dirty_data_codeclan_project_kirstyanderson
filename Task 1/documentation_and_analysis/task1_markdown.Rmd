@@ -43,6 +43,7 @@ decathlon %>% distinct(sport)
 - There is only one long_jump variable
 
 ```{r}
+# select the long_jump entry with the highest "score".
 decathlon %>% 
   filter(sport == "long_jump") %>% 
   arrange(desc(score_metres_seconds)) %>% 
@@ -54,75 +55,59 @@ A: Clay had the longest long jump at 7.96 metres.
 Q2: What was the average 100m time in each competition?
 
 ```{r}
+# Get the average 100m time in each competition
 decathlon %>% 
   filter(sport == "x100m") %>% 
   group_by(competition) %>% 
   summarise(average_100m = round(mean(score_metres_seconds), digits =2)) 
-  
+
   
 ```
 A: The average 100m time in the Decastar competition was 11.18 seconds, in the OlympicG competition it was       10.92 seconds.
 --------------------------------------------------------------------------------
 
 Q3: Who had the highest total points across both competitions?
-Step 1: Check all athletes competed in both competitions
-Step 2: Get total points for all athletes
-Step 3: Get highest points
-
 
 ```{r}
+# For each athlete, count the total number of points, then select the highest
 decathlon %>% 
-  distinct(athlete, competition) %>% 
   group_by(athlete) %>% 
-  summarise(n_distinct(competition))
-  
+  summarise(total_points = sum(points)) %>% 
+  arrange(desc(total_points)) %>% 
+  head(1)
+ 
 ```
-Not all athletes competed in both competitions. Therefore I will only use athletes that competed in >1 competition.
-Create a list of athletes that competed in >1 competition (9 athletes)
+A: The athlete with the highest total points across both competitions was Sebrle.
 
-```{r}
-double_comp_athletes <- decathlon %>% 
-  distinct(athlete, competition) %>% 
-  group_by(athlete) %>% 
-  summarise(competitions_played = n_distinct(competition)) %>% 
-  arrange(desc(competitions_played)) %>% 
-  filter(competitions_played > 1) %>% 
-  pull(athlete)
-
-as.list(double_comp_athletes)
-```
-
-```{r}
-for (athlete_name in double_comp_athletes) {
-  decathlon %>% 
-    filter(athlete == "athlete_name") %>% 
-    group_by(competition) %>% 
-    summarise()
-  
-}
-
-
-
-
-
-```
-
-```{r}
-decathlon %>% 
-    filter(athlete == "barras") %>% 
-    distinct(competition, points) %>% 
-  summarise(sum(points)) %>% 
-  
-  
-```
+---------------------------------------------------------------------------------
 
 Q4: What was the shot-put scores for the top three competitors in each competition?
-- First find the top 3 competitors in each competition
+
+A: 
 ```{r}
+decathlon %>% 
+  group_by(competition) %>% 
+  filter(sport == "shot_put" & rank %in% c(1, 2, 3)) %>% 
+  arrange(desc(points))
+  
+```
+
+--------------------------------------------------------------------------------
+
+Q5: What was the average points for competitors who ran the 400m in less than 50 seconds vs. those than ran 400m in more than 50 seconds?
+
+```{r}
+decathlon %>% 
+  filter(sport == "x400m" & score_metres_seconds < 50.00) %>% 
+  summarise(avg_less_50s = round(mean(points), digits = 0)) %>% 
+  pull(avg_less_50s)
 
 decathlon %>% 
-  select(distinct(athlete,competition))
-  group_by(competition) %>% 
-  arrange(desc(points))
+  filter(sport == "x400m" & score_metres_seconds > 50.00) %>% 
+  summarise(avg_more_50s = round(mean(points), digits = 0)) %>% 
+  pull(avg_more_50s)
+
 ```
+A: For competititors who ran the 400m in <50 seconds, the average points was 8120. For competitors who did it in >50 seconds, the average points was 7727.
+
 
