@@ -12,5 +12,51 @@ output: html_document
 
 3. Cleaning the Data
 4. Analysis Answers
+
+load packages and read data
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+candy_full <- read_csv(here::here("clean_data/candy_cleaned.csv"))
+```
+
+
+Q1: What is the total number of candy ratings given across the three years. (Number of candy ratings, not the         number of raters. Don’t count missing values)
+
+A: There were 772352 ratings
+
+```{r}
+candy_full %>% 
+  select(candy, rating) %>% 
+  filter(!is.na(rating)) %>% 
+  nrow()
+```
+Q2: What was the average age of people who are going out trick or treating?
+A:
+check what answers are in column going out
+```{r}
+candy_full %>% 
+  distinct(going_out)
+```
+Filter for "yes" to going out
+# check what answers are in age col
+```{r}
+candy_full %>% 
+  distinct(age)
+```
+
+only include age that is numner
+
+```{r}
+candy_full_num_age <- candy_full %>% 
+  filter(!is.numeric(age))
+
+candy_full %>% 
+  distinct(age)
+```
+
 5. Conclusions and notes
 

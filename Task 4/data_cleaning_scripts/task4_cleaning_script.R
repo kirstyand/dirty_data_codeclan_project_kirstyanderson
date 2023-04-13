@@ -5,7 +5,6 @@ library(here)
 library(readxl)
 library(waldo)
 library(gtools)
-library(plyr)
 library(dplyr)
 library(tidyr)
 # Load data
@@ -217,6 +216,25 @@ candy_clean_long <- pivot_longer(bind_15_16_17,
                                      values_to = "rating") %>% 
   relocate(candy, .after = state) %>% 
   relocate(rating, .after = candy)
+
+# sorting age column
+
+# replace all non-numeric values with NA
+
+# create column showing distinct ages to make it easier to visualise
+
+distinct_candy_age <- candy_clean_long %>% 
+  select(age) %>% 
+  distinct(age)
+
+# if the age contains no numbers, replace with NA
+
+ 
+candy_clean_long$age[!grepl("^-?[0-9]+(\\.[0-9]+)?$", candy_clean_long$age)] <- NA # search for strings that don't contain the pattern, replace these with NA
+candy_clean_long$age <- as.numeric(candy_clean_long$age) #convert the column to numeric
+candy_clean_long$age <- round(candy_clean_long$age, digits = 0) # round 
+
+
 
 #write csv
 
