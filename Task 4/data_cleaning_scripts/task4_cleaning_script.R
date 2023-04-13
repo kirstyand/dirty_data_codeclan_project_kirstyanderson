@@ -6,11 +6,13 @@ library(readxl)
 library(waldo)
 library(gtools)
 library(plyr)
+library(dplyr)
+library(tidyr)
 # Load data
 
-candy_2015 <- read_xlsx(here("raw_data/candy_ranking_data/boing-boing-candy-2015.xlsx"))
-candy_2016 <- read_xlsx(here("raw_data/candy_ranking_data/boing-boing-candy-2016.xlsx"))
-candy_2017 <- read_xlsx(here("raw_data/candy_ranking_data/boing-boing-candy-2017.xlsx"))
+#candy_2015 <- read_xlsx(here("raw_data/candy_ranking_data/boing-boing-candy-2015.xlsx"))
+#candy_2016 <- read_xlsx(here("raw_data/candy_ranking_data/boing-boing-candy-2016.xlsx"))
+#candy_2017 <- read_xlsx(here("raw_data/candy_ranking_data/boing-boing-candy-2017.xlsx"))
 
 candy_2015 <- read_xlsx("/Users/KDizzle/Documents/GitHub/dirty_data_codeclan_project_kirstyanderson/Task 4/raw_data/candy_ranking_data/boing-boing-candy-2015.xlsx")
 candy_2016 <- read_xlsx("/Users/KDizzle/Documents/GitHub/dirty_data_codeclan_project_kirstyanderson/Task 4/raw_data/candy_ranking_data/boing-boing-candy-2016.xlsx")
@@ -156,14 +158,66 @@ country_list <- bind_15_16_17 %>%
   distinct()
 
 # start by putting all in lower case and arranging alphabetically
-country_list <- country_list %>% 
+bind_15_16_17 <- bind_15_16_17 %>% 
   mutate(country = str_to_lower(country)) %>% 
   arrange(country)
 
-# usa
+# recode for usa
 
-country_list %>% 
-  if(country = starts_with(us),
-     )
+bind_15_16_17 <- bind_15_16_17 %>% 
+  mutate(country = recode(country,
+                                  "'merica" = "usa",
+                                  "america" = "usa",
+                                  "i pretend to be from canada, but i am really from the united states." = "usa",
+                                  "n. america" = "usa",
+                                  "the best one - usa" = "usa",
+                                  "the united states" = "usa",
+                                  "the united states of america" = "usa",
+                                  "sub-canadian north america... 'merica" = "usa",
+                                  "the yoo ess of aaayyyyyy" = "usa",
+                                  "u s" = "usa",
+                                  "u s a" = "usa",
+                                  "u.s." = "usa",
+                                  "u.s.a" = "usa",
+                                  "u.s.a." = "usa",
+                                  "unhinged states" = "usa",
+                                  "unied states" = "usa",
+                                  "unite states" = "usa",
+                                  "united  states of america" = "usa",
+                                  "united sates" = "usa",
+                                  "united staes" = "usa",
+                                  "united state" = "usa",
+                                  "united statea" = "usa",
+                                  "united stated" = "usa",
+                                  "united states" = "usa",
+                                  "united states of america" = "usa",
+                                  "united statss" = "usa",
+                                  "united stetes" = "usa",
+                                  "united ststes" = "usa",
+                                  "unites states" = "usa",
+                                  "units states" = "usa",
+                                  "us" = "usa",
+                                  "us of a" = "usa",
+                                  "ussa"  = "usa")) %>% 
+  relocate(country, .after = going_out) %>% 
+  relocate(state, .after = country) %>% 
+  relocate(gender, .after = age) %>% 
+  relocate("green_party_m_ms":"take_5")
+
+# turn candy ratings into long format
 
 
+candy_clean_long <- pivot_longer(bind_15_16_17,
+                                     cols = c("butterfinger": "york_peppermint_patties", 
+                                             "necco_wafers", 
+                                             "sea_salt_flavored_stuff_probably_chocolate_since_this_is_the_it_flavor_of_the_year",
+                                             "bonkers_the_board_game":"whatchamacallit_bars",
+                                             "green_party_m_ms":"take_5"),
+                                     names_to = "candy",
+                                     values_to = "rating") %>% 
+  relocate(candy, .after = state) %>% 
+  relocate(rating, .after = candy)
+
+#write csv
+
+write_csv(candy_clean_long, "clean_data/candy_cleaned.csv")
