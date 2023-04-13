@@ -82,14 +82,14 @@ candy_2015_clean_rename <- candy_2015_clean_rename %>%
 
 # bind all tables together, fill blanks with NA
 
-bind_15_16_17_pass1 <- rbind.fill(candy_2015_clean_rename, candy_2016_clean_rename, candy_2017_clean_rename)
+#bind_15_16_17_pass1 <- rbind.fill(candy_2015_clean_rename, candy_2016_clean_rename, candy_2017_clean_rename)
 
 # create list of all column names
-all_colnames_pass1 <- sort(colnames(bind_15_16_17_pass1))
+#all_colnames_pass1 <- sort(colnames(bind_15_16_17_pass1))
 
 # check for columns that may be repeated by looking at full list
-all_colnames_pass1
-merge_15_16_17
+#all_colnames_pass1
+#merge_15_16_17
 # possible combinations:
 
 # 2015 & 2016: "anonymous_brown_globs_that_come_in_black_and_orange_wrappers"
@@ -135,10 +135,20 @@ candy_2017_clean_rename <- candy_2017_clean_rename %>%
 
 candy_2017_clean_rename <- candy_2017_clean_rename %>% 
   dplyr::rename("x100_grand_bar" = "100_grand_bar")
+# add year column for each dataset
+
+candy_2015_clean_rename <- candy_2015_clean_rename %>% 
+  add_column(year = 2015,.after = "going_out")
+
+candy_2016_clean_rename <- candy_2016_clean_rename %>% 
+  add_column(year = 2016,.after = "going_out")
+
+candy_2017_clean_rename <- candy_2017_clean_rename %>% 
+  add_column(year = 2017,.after = "going_out")
 
 # now bind again
 
-bind_15_16_17 <- rbind.fill(candy_2015_clean_rename, candy_2016_clean_rename, candy_2017_clean_rename)
+bind_15_16_17 <- plyr::rbind.fill(candy_2015_clean_rename, candy_2016_clean_rename, candy_2017_clean_rename)
 
 head(bind_15_16_17, n = 0)
 all_colnames_pass2 <- sort(colnames(bind_15_16_17))
@@ -151,7 +161,7 @@ all_cols_df <- cbind(cols_2015, cols_2016, cols_2017)
 # columns are good (ish)
 # look at country column
 
-country_list <- bind_15_16_17 %>% 
+country_list <- candy_clean_long %>% 
   select(country) %>% 
   filter(!is.na(country)) %>% 
   distinct()
@@ -201,6 +211,7 @@ bind_15_16_17 <- bind_15_16_17 %>%
   relocate(country, .after = going_out) %>% 
   relocate(state, .after = country) %>% 
   relocate(gender, .after = age) %>% 
+  relocate(year, .after = going_out)
   relocate("green_party_m_ms":"take_5")
 
 # turn candy ratings into long format
@@ -234,6 +245,9 @@ candy_clean_long$age[!grepl("^-?[0-9]+(\\.[0-9]+)?$", candy_clean_long$age)] <- 
 candy_clean_long$age <- as.numeric(candy_clean_long$age) #convert the column to numeric
 candy_clean_long$age <- round(candy_clean_long$age, digits = 0) # round 
 
+#also replace "inf"
+
+candy_clean_long$age[sapply(candy_clean_long$age, is.infinite)] <- NA
 
 
 #write csv

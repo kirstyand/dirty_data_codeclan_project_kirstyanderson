@@ -17,10 +17,12 @@ load packages and read data
 ```{r}
 library(tidyverse)
 library(here)
+library(stringr)
 ```
 
 ```{r}
 candy_full <- read_csv(here::here("clean_data/candy_cleaned.csv"))
+
 ```
 
 
@@ -36,10 +38,13 @@ candy_full %>%
 ```
 Q2: What was the average age of people who are going out trick or treating?
 A:
-check what answers are in column going out
+check what answers are in column going out & check class of age col
 ```{r}
 candy_full %>% 
   distinct(going_out)
+ 
+class(candy_full$age)
+
 ```
 Filter for "yes" to going out
 # check what answers are in age col
@@ -48,15 +53,202 @@ candy_full %>%
   distinct(age)
 ```
 
-only include age that is numner
+
 
 ```{r}
-candy_full_num_age <- candy_full %>% 
-  filter(!is.numeric(age))
-
 candy_full %>% 
-  distinct(age)
+  filter(going_out == "Yes") %>% 
+  summarise(avg_age = round(mean(age, na.rm = TRUE), digits = 0))
+```
+A: The average age for people that were going_out is 253.
+
+Q3: What was the average age of people who are not going trick or treating?
+
+```{r}
+candy_full %>% 
+  filter(going_out == "No") %>% 
+  summarise(avg_age = round(mean(age, na.rm = TRUE), digits = 0))
+```
+A: The average age for people that were going_out is 40.
+
+
+Q4: For each of joy, despair and meh, which candy bar received the most of these ratings?
+
+```{r}
+rating_options <- c("JOY", "DESPAIR", "MEH")
+
+for (vote in rating_options){
+  max_candy <-  candy_full %>% 
+                filter(rating == vote) %>% 
+                count(candy) %>% 
+                arrange(desc(n)) %>% 
+                head(1)
+phrase <- paste("The candy '",max_candy[1,1],"' received the most",vote,"ratings, with",max_candy[1,2],"ratings.")
+print(phrase)
+}
+
 ```
 
+
+Q5: How many people rated Starburst as despair?
+
+```{r}
+candy_full %>% 
+  filter(candy == "starburst") %>% 
+  filter(rating == "DESPAIR") %>% 
+  summarise(count = n())
+```
+A: 1990 people rated startburst with despair
+
+For the next three questions, count despair as -1, joy as +1, and meh as 0.
+
+```{r}
+#recode each rating to its new number, save this to a new column called "num_rating"
+candy_full <- candy_full %>% 
+  mutate(num_rating = recode(rating,
+                             "JOY" = 1,
+                             "DESPAIR" = -1,
+                             "MEH" = 0)) %>% 
+  relocate(num_rating, .after = rating)
+
+```
+
+Q6 What was the most popular candy bar by this rating system for each gender in the dataset ?
+
+
+```{r}
+# create a vector containing all possible gender categories, called "gender_option"
+gender_option <- c("Female", "Male", NA)
+
+# For each gender option, if it is not NA, then filter the df for the selected gender, summarise the total points for each candy and print the highest one
+for (gender_cat in gender_option){
+  if (!is.na(gender_cat)){
+    max_candy <- candy_full %>% 
+    filter(gender == gender_cat) %>% 
+    group_by(candy) %>% 
+    summarise(points = sum(num_rating, na.rm = TRUE)) %>% 
+    arrange(desc(points)) %>% 
+    head(1)
+  
+phrase <- paste("When gender was",gender_cat, "the top rated candy bar was",max_candy[1,1],"which scored",max_candy[1,2],"points")
+    
+print(phrase)  
+  } 
+  # if the gender is na, do the same thing but filter for gender is NA
+  else {
+    max_candy <- candy_full %>% 
+    filter(is.na(gender)) %>% 
+    group_by(candy) %>% 
+    summarise(points = sum(num_rating, na.rm = TRUE)) %>% 
+    arrange(desc(points)) %>% 
+    head(1)
+  
+phrase <- paste("When gender was NA the top rated candy bar was",max_candy[1,1],"which scored",max_candy[1,2],"points")
+    
+print(phrase)  
+    
+  }}
+ 
+```
+
+Q7. What was the most popular candy bar in each year?
+
+```{r}
+year_option <- c(2015, 2016, 2017)
+
+for(year_cat in year_option){
+  max_year <- candy_full %>% 
+              filter(year == year_cat) %>% 
+              group_by(candy) %>% 
+              summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
+              arrange(desc(total)) %>% 
+              head(1)
+  phrase <- paste("In",year_cat,"the most popular candy bar was '",max_year[1,1],"', which scored",max_year[1,2],"points.")
+  print(phrase)
+}
+
+```
+
+Q8. 
+What was the most popular candy bar by this rating for people in US, Canada, UK, and all other countries?
+get list of countries
+```{r}
+candy_full %>% 
+  distinct(country)
+```
+
+```{r}
+#USA:
+candy_full %>% 
+              filter(country == "[usa]") %>% 
+              group_by(candy) %>% 
+              summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
+              arrange(desc(total)) %>% 
+              head(1)
+
+```
+
+```{r}
+# USA 
+candy_full %>% 
+  filter(str_detect(country, "usa")) %>% 
+  filter(!str_detect(country, "not")) %>% 
+  group_by(candy) %>% 
+  summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
+  arrange(desc(total))
+
+
+```
+A: any_full_sized_candy_bar which scored 2158 points.
+
+```{r}
+# UK: check filter:
+
+candy_full %>% 
+  filter(str_detect(country, "uk|u.k.|united|kingdom|scotland|ireland|england|wales" )) %>% 
+  filter(!str_detect(country, "not|states|soviet")) %>%
+  distinct(country)
+  
+  
+  candy_full %>% 
+  filter(str_detect(country, "uk|u.k.|united|kingdom|scotland|ireland|england|wales" )) %>% 
+  filter(!str_detect(country, "not|states|soviet")) %>%
+  group_by(candy) %>% 
+  summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
+  arrange(desc(total))
+
+```
+```{r}
+# Canada: check filter:
+
+candy_full %>% 
+  filter(str_detect(country, "canada" )) %>% 
+  filter(!str_detect(country, "not")) %>%
+  distinct(country)
+  
+  
+  candy_full %>% 
+  filter(str_detect(country, "canada" )) %>% 
+  filter(!str_detect(country, "not")) %>%
+  group_by(candy) %>% 
+  summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
+  arrange(desc(total))
+```
+```{r}
+# all other countries
+
+candy_full %>% 
+  filter(!str_detect(country, "canada|uk|u.k.|united|kingdom|scotland|ireland|england|wales|usa" )) %>%
+  distinct(country)
+
+candy_full %>% 
+ filter(!str_detect(country, "canada|uk|u.k.|united|kingdom|scotland|ireland|england|wales|usa" )) %>% 
+  group_by(candy) %>% 
+  summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
+  arrange(desc(total))
+```
+
+
 5. Conclusions and notes
+
 
