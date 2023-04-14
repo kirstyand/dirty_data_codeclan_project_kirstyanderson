@@ -20,10 +20,11 @@ I have cleaned the dataset in the file task4_cleaning_script.R, and then perform
 
 # 2. Assumptions
 
--   I have made some assumptions in regards to column names across the 3 sets e.g. bonkers(2015) = bonkers_the_candy and not bonkers_the_boardgame (2016 & 2017). See table for transformations: \|
+-   I have made some assumptions in regards to column names across the 3 sets e.g. bonkers(2015) = bonkers_the_candy and not bonkers_the_boardgame (2016 & 2017).
+    See table for transformations: \|
 
     +:----------------------------------------------------------------------:+:------------------------------------------------------------------------:+:-------------------------------------------------------------------------------:+:-------------------------:+
-    | ### **2015**                                                           | ### 2016                                                                 | ### 2017                                                                        | ### Change                |
+    | ### **2015**                                                           | ### **2016**                                                             | ### **2017**                                                                    | ### **Change**            |
     +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
     | box_o\_raisins                                                         | boxo_raisins                                                             | boxo_raisins                                                                    | 2015 to match 16/17       |
     +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
@@ -43,7 +44,8 @@ I have cleaned the dataset in the file task4_cleaning_script.R, and then perform
 
     : Candy Column Name Transformations
 
--   I have assumed that any variations of usa e.g. U.S or U.S of A is the same as usa
+-   I have assumed that any variations of usa e.g.
+    U.S or U.S of A is the same as usa
 
 -   I have taken the age column at face-value - i.e. have not removed any impossible age values such as 200587.
 
@@ -515,7 +517,7 @@ A: The highest scoring elsewhere was again full sized candy bars at 101 points, 
 
 ------------------------------------------------------------------------
 
-5.  Conclusions and notes
+# 5. Conclusions and notes
 
 There is a lot more cleaning of this dataset that I would like to return to carry out, e.g. creating a better function to create a uniform country column, and finding out if the numbers in the country column relate to anything.
 I also feel there is more analysis that I could carry out such as finding trends amongst age and gender, however as the survey was very open it is hard to get accurate data findings - e.g. the age column ranges from 1 to 200587.
