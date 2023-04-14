@@ -98,7 +98,7 @@ all_cols  <- c(cols_2015, cols_2016, cols_2017) %>%
 
 # Possible Combinations:
 
-# 2015  : box_O_raisins              <- rename
+# 2015  : box_o_raisins              <- rename
 # 2016/7: boxo_raisins
 
 # 2015  : bonkers                    <- rename

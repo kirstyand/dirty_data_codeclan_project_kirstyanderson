@@ -3,128 +3,166 @@ title: "task4_markdown"
 author: "Kirsty Anderson"
 date: "2023-04-11"
 output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
-1. Introduction
+# 1. Introduction
 
 This dataset is a combination of 3 sets of answers to 3 consecutive annual surveys from 2015, 2016, and 2017 about Halloween candy.
-The survey differs slightly each year, but in general it asks the users' age, gender, location, if they plan on "trick - or - treating", and then goes on to ask the user their opinion on various types of Halloween candy. It also asks the users opinion on various other topics.
+The survey differs slightly each year, but in general it asks the users' age, gender, location, if they plan on "trick - or - treating", and then goes on to ask the user their opinion on various types of Halloween candy.
+It also asks the users opinion on various other topics.
 
 I have cleaned the dataset in the file task4_cleaning_script.R, and then performed analyses on the data in this file.
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 
-2. Assumptions
-- I have made some assumptions in regards to column names across the 3 sets e.g. bonkers(2015) = bonkers_the_candy (2016 & 2017) and not bonkers_the_boardgame. 
-- I have assumed that any variations of usa e.g. U.S or U.S of A is the same as usa
-- I have taken the age column at face-value - i.e. have not removed any impossible age values such as 200587.
+# 2. Assumptions
 
---------------------------------------------------------------------------------
+-   I have made some assumptions in regards to column names across the 3 sets e.g. bonkers(2015) = bonkers_the_candy and not bonkers_the_boardgame (2016 & 2017). See table for transformations: \|
 
-3. Cleaning the Data
+    +:----------------------------------------------------------------------:+:------------------------------------------------------------------------:+:-------------------------------------------------------------------------------:+:-------------------------:+
+    | ### **2015**                                                           | ### 2016                                                                 | ### 2017                                                                        | ### Change                |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+    | box_o\_raisins                                                         | boxo_raisins                                                             | boxo_raisins                                                                    | 2015 to match 16/17       |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+    | bonkers                                                                | bonkers_the_candy/ bonkers_the_board_game                                | bonkers_the_candy/\                                                             | 2015 to bonkers_the_candy |
+    |                                                                        |                                                                          | bonkers_the_board_game                                                          |                           |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+    | sweetums                                                               | sweetums_a\_friend_to_diabetes                                           | sweetums_a\_friend_to_diabetes                                                  | 2015 to match 16/17       |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+    | anonymous_brown_globs_that_come_in_black_and_orange_wrappers           | anonymous_brown_globs_that_come_in_black_and_orange_wrappers             | anonymous_brown_globs_that_come_in_black_and_orange_wrappers_a\_k_a\_mary_janes | 2017 to match 15/16       |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+    | that_dress_that_went_viral_early_this_year_when_i\_first_saw_it_it_was | that_dress_that_went_viral_a\_few_years_back_when_i\_first_saw_it_it_was | q10_dress                                                                       | all to "viral_dress"      |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+    | which_day_do_you_prefer_friday_or_sunday                               | which_day_do_you_prefer_friday_or_sunday                                 | q11_day                                                                         | 2017 to match 15/16       |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+    | x100_grand_bar                                                         | x100_grand_bar                                                           | 100_grand_bar                                                                   | 2017 to match 15/16       |
+    +------------------------------------------------------------------------+--------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 
-- I first transformed the columns to snake_case using the janitor::clean_names function.
-- I then dealt with the column headers. Across the 3 sets, the column names differed and it was obvious that some columns were the same across differnet years, just with slightly different naming e.g. the column titled "how_old_are_you" in the 2015 and 2016 sets would be the same as "age" in the 2017 set. I used the recode() function to change these, the full transformation can be seen in the script but for example:
+    : Candy Column Name Transformations
 
-```{r}
-candy_2015_clean <- candy_2015_clean %>% 
-  rename("going_out" = "are_you_going_actually_going_trick_or_treating_yourself", 
-         "age"       = "how_old_are_you")
-```
+-   I have assumed that any variations of usa e.g. U.S or U.S of A is the same as usa
 
-- I also spent some time matching the candy columns from different data sets e.g.
-```{r}
-candy_2015_clean <- candy_2015_clean %>% 
-  rename("boxo_raisins"                  = "box_o_raisins",
-         "bonkers_the_candy"             = "bonkers",
-         "sweetums_a_friend_to_diabetes" = "sweetums",
-         "viral_dress" = "that_dress_that_went_viral_early_this_year_when_i_first_saw_it_it_was")
+-   I have taken the age column at face-value - i.e. have not removed any impossible age values such as 200587.
 
-```
+------------------------------------------------------------------------
 
-- I knew that I was going to join the 3 datasets together, and wanted to preserve the year each observation was recorded,
-  I added a constant value column containing the year to the beginning of each dataset e.g.:
-```{r}
-candy_2015_clean <- candy_2015_clean %>% 
-  add_column(year = 2015,.after = "going_out")
-```
-  
-- I then boung the 3 datasets, for any missing values I filled with NA using the plyr::rbind.fill() function:
-```{r}
-candy_clean_bound <- plyr::rbind.fill(candy_2015_clean, 
-                                candy_2016_clean, 
-                                candy_2017_clean)
-```
+# 3. Cleaning the Data
 
-- I then converted the dataset to long format to make it tidy, creating a column for candy and a column for rating. I left all non-candy columns in wide format.
-```{r}
-candy_clean_long <- pivot_longer(candy_clean_bound,
-                                 cols = c("butterfinger": "york_peppermint_patties", 
-                                          "necco_wafers", 
-                                          "sea_salt_flavored_stuff_probably_chocolate_since_this_is_the_it_flavor_of_the_year",
-                                          "bonkers_the_board_game":"whatchamacallit_bars",
-                                          "green_party_m_ms":"take_5"),
-                                 names_to = "candy",
-                                 values_to = "rating")  %>% 
-                    relocate(candy, .after = going_out) %>% 
-                    relocate(rating, .after = candy)
-```
-
-- Now that the columns were reasonably clean and tidy, I dealt with some of the "dirty" values, specifically the country and age column.
-- The country column was free text input, so it contained lots of entry styles from the same country.
-- In the future, I would like to create a more efficient formula to recode this, but for now I recoded it manually as well as I could, for example: 
-```{r}
-candy_clean_long <- candy_clean_long %>% 
-  mutate(country = recode(country,
-                          "'merica" = "usa",
-                          "america" = "usa",
-                          )) 
-
-```
-
-- The age column contained string values, so couldn't be converted to a numerical format.
--  I replaced any strings with NA, and any infinite values as NA
-
-```{r}
-candy_clean_long$age[!grepl("^-?[0-9]+(\\.[0-9]+)?$", candy_clean_long$age)] <- NA 
-candy_clean_long$age <- as.numeric(candy_clean_long$age) # (2) convert the column to numeric
-candy_clean_long$age <- round(candy_clean_long$age, digits = 0) # (3) round age to nearest integer 
-candy_clean_long$age[sapply(candy_clean_long$age, is.infinite)] <- NA # replace infinite with NA
-```
-
-- I then wrote this cleaned, transformed data to csv and saved it into the cleaned_data folder.
-
---------------------------------------------------------------------------------
-
-
-4. Analysis Answers
 Load packages and Read Data
+
 ```{r}
 library(tidyverse)
 library(here)
 library(stringr)
 ```
 
+-   I first transformed the columns to snake_case using the janitor::clean_names function.
+-   I then dealt with the column headers. Across the 3 sets, the column names differed and it was obvious that some columns were the same across differnt years, just with slightly different naming e.g. the column titled "how_old_are_you" in the 2015 and 2016 sets would be the same as "age" in the 2017 set. I used the recode() function to change these, the full transformation can be seen in the script but for example:
+
+```{r}
+# candy_2015_clean <- candy_2015_clean %>% 
+#  rename("going_out" = "are_you_going_actually_going_trick_or_treating_yourself", 
+#         "age"       = "how_old_are_you")
+```
+
+-   I also spent some time matching the candy columns from different data sets e.g.
+
+```{r}
+# candy_2015_clean <- candy_2015_clean %>% 
+#   rename("boxo_raisins"                  = "box_o_raisins",
+#          "bonkers_the_candy"             = "bonkers",
+#          "sweetums_a_friend_to_diabetes" = "sweetums",
+#          "viral_dress" = "that_dress_that_went_viral_early_this_year_when_i_first_saw_it_it_was")
+
+```
+
+-   I knew that I was going to join the 3 datasets together, and wanted to preserve the year each observation was recorded, I added a constant value column containing the year to the beginning of each dataset e.g.:
+
+```{r}
+# candy_2015_clean <- candy_2015_clean %>% 
+#   add_column(year = 2015,.after = "going_out")
+```
+
+-   I then boung the 3 datasets, for any missing values I filled with NA using the plyr::rbind.fill() function:
+
+```{r}
+# candy_clean_bound <- plyr::rbind.fill(candy_2015_clean, 
+#                                 candy_2016_clean, 
+#                                 candy_2017_clean)
+```
+
+-   I then converted the dataset to long format to make it tidy, creating a column for candy and a column for rating. I left all non-candy columns in wide format.
+
+```{r}
+# candy_clean_long <- pivot_longer(candy_clean_bound,
+#                                  cols = c("butterfinger": "york_peppermint_patties", 
+#                                           "necco_wafers", 
+#                                           "sea_salt_flavored_stuff_probably_chocolate_since_this_is_the_it_flavor_of_the_year",
+#                                           "bonkers_the_board_game":"whatchamacallit_bars",
+#                                           "green_party_m_ms":"take_5"),
+#                                            names_to = "candy",
+#                                            values_to = "rating")  %>% 
+#                     relocate(candy, .after = going_out) %>% 
+#                     relocate(rating, .after = candy)
+```
+
+-   Now that the columns were reasonably clean and tidy, I dealt with some of the "dirty" values, specifically the country and age column.
+-   The country column was free text input, so it contained lots of entry styles from the same country.
+-   In the future, I would like to create a more efficient formula to recode this, but for now I recoded it manually as well as I could, for example:
+
+```{r}
+# candy_clean_long <- candy_clean_long %>% 
+#   mutate(country = recode(country,
+#                           "'merica" = "usa",
+#                           "america" = "usa",
+#                           )) 
+
+```
+
+-   The age column contained string values, so couldn't be converted to a numerical format.
+-   I replaced any strings with NA, and any infinite values as NA
+
+```{r}
+# candy_clean_long$age[!grepl("^-?[0-9]+(\\.[0-9]+)?$", candy_clean_long$age)] <- NA 
+# candy_clean_long$age <- as.numeric(candy_clean_long$age) # (2) convert the column to numeric
+# candy_clean_long$age <- round(candy_clean_long$age, digits = 0) # (3) round age to nearest integer 
+# candy_clean_long$age[sapply(candy_clean_long$age, is.infinite)] <- NA # replace infinite with NA
+```
+
+-   I then wrote this cleaned, transformed data to csv and saved it into the cleaned_data folder.
+
+------------------------------------------------------------------------
+
+# 4. Analysis Answers
+
+Load Data
+
 ```{r}
 candy_full <- read_csv(here::here("clean_data/candy_cleaned.csv"))
 ```
 
+Q1: What is the total number of candy ratings given across the three years.
 
-Q1: What is the total number of candy ratings given across the three years. 
+```         
 (Number of candy ratings, not the number of raters. Don’t count missing values)
-
-A: There were 772352 ratings
+```
 
 ```{r}
 # count number of rows that have valid candy ratings
+
 candy_full %>% 
   select(candy, rating) %>% 
   filter(!is.na(rating)) %>% 
   nrow()
-```
-Q2: What was the average age of people who are going out trick or treating?
 
-A:
+```
+
+A: There were 772352 ratings
+
+Q2: What was the average age of people who are going out trick or treating?
 
 ```{r}
 # 1: check what answers are in column "going_out" & check age col is numerical
@@ -143,6 +181,7 @@ candy_full %>%
   filter(going_out == "Yes") %>% 
   summarise(avg_age = round(mean(age, na.rm = TRUE), digits = 0))
 ```
+
 A: The average age for people that were going out is 253.
 
 Q3: What was the average age of people who are not going trick or treating?
@@ -153,8 +192,8 @@ candy_full %>%
   filter(going_out == "No") %>% 
   summarise(avg_age = round(mean(age, na.rm = TRUE), digits = 0))
 ```
-A: The average age for people that were going_out is 40.
 
+A: The average age for people that were going_out is 40.
 
 Q4: For each of joy, despair and meh, which candy bar received the most of these ratings?
 
@@ -174,6 +213,7 @@ print(phrase)
 }
 
 ```
+
 Since "any_full_sized_candy_bar" doesn't provide much information, repeat code above and discount this to get second top choice:
 
 ```{r}
@@ -192,7 +232,6 @@ print(phrase)
 }
 ```
 
-
 Q5: How many people rated Starburst as despair?
 
 ```{r}
@@ -202,9 +241,8 @@ candy_full %>%
   filter(rating == "DESPAIR") %>% 
   summarise(count = n())
 ```
+
 A: 1990 people rated startburst with despair
-
-
 
 For the next three questions, count despair as -1, joy as +1, and meh as 0.
 
@@ -219,9 +257,7 @@ candy_full <- candy_full %>%
 
 ```
 
-
-Q6 What was the most popular candy bar by this rating system for each gender in the dataset ?
-
+Q6: What was the most popular candy bar by this rating system for each gender in the dataset ?
 
 ```{r}
 # create a vector containing all possible gender categories, called "gender_option"
@@ -257,7 +293,9 @@ print(phrase)
   }}
  
 ```
+
 As in Question 4: "any_full_sized_candy_bar" isn't really a candy choice, repeat code above and discount this to get second top choice:
+
 ```{r}
 
 gender_option <- c("Female", "Male", "Other", NA)
@@ -294,6 +332,7 @@ for (gender_cat in gender_option){
   }}
 
 ```
+
 Rerun again but also remove cash_or_other_forms_of_legal_tender!
 
 ```{r}
@@ -334,8 +373,8 @@ for (gender_cat in gender_option){
   }}
 ```
 
-
-Q7. What was the most popular candy bar in each year?
+Q7.
+What was the most popular candy bar in each year?
 
 ```{r}
 # create a vector containing all possible years, called "year_option"
@@ -378,7 +417,7 @@ for(year_cat in year_option){
 
 ```
 
-Q8. 
+Q8.
 What was the most popular candy bar by this rating for people in US, Canada, UK, and all other countries?
 
 ```{r}
@@ -388,6 +427,7 @@ candy_full %>%
 ```
 
 1: USA:
+
 ```{r}
 # Filter where country contains the string "usa", group by candy, count ratings for each candy and find the top
 # Check filter first:
@@ -407,8 +447,9 @@ candy_full %>%
 
 
 ```
-A: Any_full_sized_candy_bar scored the highest in the USA at 2158 points however does not technically answer the question. 
-   The highest actual candy bar was Reese's Peanut Butter Cups that scored 1971 points.
+
+A: Any_full_sized_candy_bar scored the highest in the USA at 2158 points however does not technically answer the question.
+The highest actual candy bar was Reese's Peanut Butter Cups that scored 1971 points.
 
 2: Canada
 
@@ -428,10 +469,12 @@ A: Any_full_sized_candy_bar scored the highest in the USA at 2158 points however
   summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
   arrange(desc(total))
 ```
-A: Any_full_sized_candy_bar scored the highest in Canada at 251 points however does not technically answer the question. 
-   The highest actual candy bar was Kit-Kat that scored 229 points.
-   
+
+A: Any_full_sized_candy_bar scored the highest in Canada at 251 points however does not technically answer the question.
+The highest actual candy bar was Kit-Kat that scored 229 points.
+
 3: UK:
+
 ```{r}
 # Check filter:
 
@@ -449,10 +492,11 @@ A: Any_full_sized_candy_bar scored the highest in Canada at 251 points however d
   arrange(desc(total))
 
 ```
+
 A: The highest scoring in the UK was cash, but the highest scoring actual candy was Lindt truffles at 35 points.
 
-
 4: Other Countries
+
 ```{r}
 # Check Filter:
 
@@ -466,11 +510,12 @@ candy_full %>%
   summarise(total = sum(num_rating, na.rm = TRUE)) %>% 
   arrange(desc(total))
 ```
+
 A: The highest scoring elsewhere was again full sized candy bars at 101 points, but the highest scoring actual candy was Kit-Kat at 77 points.
 
+------------------------------------------------------------------------
 
-5. Conclusions and notes
+5.  Conclusions and notes
 
 There is a lot more cleaning of this dataset that I would like to return to carry out, e.g. creating a better function to create a uniform country column, and finding out if the numbers in the country column relate to anything.
 I also feel there is more analysis that I could carry out such as finding trends amongst age and gender, however as the survey was very open it is hard to get accurate data findings - e.g. the age column ranges from 1 to 200587.
-
