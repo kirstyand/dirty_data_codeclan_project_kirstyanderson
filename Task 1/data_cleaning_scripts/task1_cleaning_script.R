@@ -1,9 +1,10 @@
 # Load libraries
+
 library(tidyverse)
 library(here)
 library(janitor)
 library(readr)
-library(dplyr)
+
 
 --------------------------------------------------------------------------------
 
@@ -11,18 +12,20 @@ library(dplyr)
 
 decathlon_raw <- read_rds(here("raw_data/decathlon.rds"))
 
-# Inspect Data
-decathlon_raw
-glimpse(decathlon_raw)
-head(decathlon_raw)
-summary(decathlon_raw)
+# Look at data (Highlighted out as optional)
+
+#decathlon_raw
+#glimpse(decathlon_raw)
+#head(decathlon_raw)
+#summary(decathlon_raw)
 
 # There are 13 variables - 12 are numeric and 1 is string.
 # There are 41 observations
 
 --------------------------------------------------------------------------------
 
-# Cleaning Data
+# Clean Data
+  
   
 # Change row names to column called "athlete"
   
@@ -51,6 +54,7 @@ decathlon_clean_long <- decathlon_clean_long %>%
 decathlon_clean_long <- decathlon_clean_long %>% 
   arrange(athlete, sport,competition)
 
+
 # Tidy data: check column types
 head(decathlon_clean_long)
 # The "competition" column is a factor type, will not convert it currently as it may be useful.
@@ -60,12 +64,13 @@ head(decathlon_clean_long)
   colSums(is.na(decathlon_clean_long))
 # There are no NA values   
   
-# make all data lower case - it appears that athletes are listed both uppercase and lowercase
+# Make all data lower case - it appears that athletes are listed both uppercase and lowercase
+# Competition column cannot be changed as it is a factor
  
    decathlon_clean_long_lower <- decathlon_clean_long %>% 
     mutate_if(is.character, str_to_lower)
 
 # Write cleaned data to csv
 
-  write_csv(decathlon_clean_long_lower, "clean_data/decathlon_cleaned.csv")
+write_csv(decathlon_clean_long_lower, "clean_data/decathlon_cleaned.csv")
 

@@ -4,35 +4,99 @@ author: "Kirsty Anderson"
 date: "2023-04-10"
 output: html_document
 ---
-1. Introduction
---------------------------------------------------------------------------------
-2. Assumptions
-- Sports are measured in metres or seconds depending on the sport.
-3. Cleaning the Data
-- change row names to column called "athlete" using dplyr's row_name_to_column
-- change to long format
-- rearrange
-- convert competition to string?
-- count NAs
-4. Analysis Answers
-5. Conclusions and notes
+# 1. Introduction
+
+This dataset details results from various events at 2 sporting competitions, "OlympicG" and "Decastar".
+For each athlete in each competition, it details the sports they competed in, their result (in metres or seconds depending on the sport), their rank for that sport in that competition, and their total points for each competition.
+
+I have cleaned the dataset in the file task1_cleaning_script.R, and then performed analyses on the data in this file.
 
 
 --------------------------------------------------------------------------------
-# Load libraries
+
+# 2. Assumptions
+
+- Sports are measured in metres or seconds depending on the sport 
+- I decided when converting the data to long format to collect    all sport results in to the one column despite there being        different measurements.
+- I assume that the athletes' names given are their first names and not a combination of first name and surname
+
+--------------------------------------------------------------------------------
+
+# 3. Cleaning the Data
+
+The full cleaning script can be found in the "data_cleaning_scripts" folder, I will show some examples of code used to clean the  data but will highlight out the actual code to save rerunning it.
+
+I first read in the data using the read_rds() function
+
+```{r}
+# decathlon_raw <- read_rds(here("raw_data/decathlon.rds"))
+```
+
+I began cleaning by changing the row names into a column, and transforming the 
+column names into snake_case using janitor::clean_names
+
+```{r}
+# Change row names to column called "athlete"
+  
+# decathlon_clean <- rownames_to_column(decathlon_raw, "athlete")
+
+# Change column headers to snake_case using janitor
+
+# decathlon_clean <- clean_names(decathlon_clean)
+```
+
+
+I then converted the data to long format, creating a column for sport and a column for scores
+Although the scores were either in metres or seconds, I decided to keep all score data in the one column.
+
+```{r}
+# decathlon_clean_long <- pivot_longer(decathlon_clean,
+#              cols = "x100m":"x1500m",
+#              names_to = "sport",
+#              values_to = "score_metres_seconds")
+
+```
+
+I also then rearranged the columns to make the table easier to visualise, e.g.
+
+```{r}
+# decathlon_clean_long <- decathlon_clean_long %>% 
+#   relocate(sport, .after = athlete) %>% 
+#   relocate(score_metres_seconds, .after = sport) %>% 
+#   relocate(competition, .after = sport)
+```
+
+I then converted all character data to lower case, and made sure there was no 
+NA values
+
+```{r}
+# change to lowercase:
+
+# decathlon_clean_long_lower <- decathlon_clean_long %>% 
+#   mutate_if(is.character, str_to_lower)
+
+# check for NA:
+# colSums(is.na(decathlon_clean_long))
+```
+
+--------------------------------------------------------------------------------
+
+# 4. Analysis Answers
+
+
+Load libraries
 
 ```{r}
 library(tidyverse)
 library(here)
 ```
 
-# Load in cleaned data
+Load in cleaned data
 
 ```{r}
 decathlon <- read_csv(here("clean_data/decathlon_cleaned.csv"))
 
 ```
-# Analysis Questions 
 
 Q1: Who had the longest long jump seen in the data?
 
@@ -50,12 +114,13 @@ decathlon %>%
   head(1)
 ```
 A: Clay had the longest long jump at 7.96 metres.
+
 --------------------------------------------------------------------------------
 
 Q2: What was the average 100m time in each competition?
 
 ```{r}
-# Get the average 100m time in each competition
+# Group by competition and then find average 100m time in each. Round to 2 decimal places.
 decathlon %>% 
   filter(sport == "x100m") %>% 
   group_by(competition) %>% 
@@ -63,13 +128,14 @@ decathlon %>%
 
   
 ```
-A: The average 100m time in the Decastar competition was 11.18 seconds, in the OlympicG competition it was       10.92 seconds.
+A: The average 100m time in the Decastar competition was 11.18 seconds, 
+   in the OlympicG competition it was 10.92 seconds.
 --------------------------------------------------------------------------------
 
 Q3: Who had the highest total points across both competitions?
 
 ```{r}
-# For each athlete, count the total number of points, then select the highest
+# Group by athlete, count the total number of points, then select the highest
 decathlon %>% 
   group_by(athlete) %>% 
   summarise(total_points = sum(points)) %>% 
@@ -85,6 +151,9 @@ Q4: What was the shot-put scores for the top three competitors in each competiti
 
 A: 
 ```{r}
+# Group by each competition, filter where sport is short-put, and the rank is 1-3,
+# then find highest points
+
 decathlon %>% 
   group_by(competition) %>% 
   filter(sport == "shot_put" & rank %in% c(1, 2, 3)) %>% 
@@ -97,6 +166,7 @@ decathlon %>%
 Q5: What was the average points for competitors who ran the 400m in less than 50 seconds vs. those than ran 400m in more than 50 seconds?
 
 ```{r}
+# Filter for each time, then find mean of points for each
 decathlon %>% 
   filter(sport == "x400m" & score_metres_seconds < 50.00) %>% 
   summarise(avg_less_50s = round(mean(points), digits = 0)) %>% 
@@ -108,6 +178,12 @@ decathlon %>%
   pull(avg_more_50s)
 
 ```
-A: For competititors who ran the 400m in <50 seconds, the average points was 8120. For competitors who did it in >50 seconds, the average points was 7727.
+A: For competitors who ran the 400m in <50 seconds, the average points was 8120. For competitors who did it in >50 seconds, the average points was 7727.
 
+----------------------------------------------------------------------------------
+# 5. Conclusions and notes
 
+- To conclude, the combination of this script and analysis file provides a clean and ready to use data set as well as some          analyses.
+- I think the cleaning is sufficient given the data provided, however there could be more done to better organise the score/result   column since it combines two different units of measurement.
+- It may have also been beneficial to create a further table that groups alike sports together, to see how an athlete's             performance differs with sport type.
+- Some further analyses could be done to compare how each athlete performed in each competition.
